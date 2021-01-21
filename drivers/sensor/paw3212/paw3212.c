@@ -570,7 +570,7 @@ static void trigger_handler(struct k_work *work)
 		.chan = SENSOR_CHAN_ALL,
 	};
 
-	handler(DEVICE_GET(paw3212), &trig);
+	handler(DEVICE_DT_INST_GET(0), &trig);
 
 	key = k_spin_lock(&paw3212_data.lock);
 	if (paw3212_data.data_ready_handler) {
@@ -995,6 +995,6 @@ static const struct sensor_driver_api paw3212_driver_api = {
 	.attr_set     = paw3212_attr_set,
 };
 
-DEVICE_AND_API_INIT(paw3212, DT_INST_LABEL(0), paw3212_init,
-		    NULL, NULL, POST_KERNEL, CONFIG_SENSOR_INIT_PRIORITY,
-		    &paw3212_driver_api);
+DEVICE_DT_INST_DEFINE(0, paw3212_init, device_pm_control_nop,
+		      NULL, NULL, POST_KERNEL, CONFIG_SENSOR_INIT_PRIORITY,
+		      &paw3212_driver_api);
