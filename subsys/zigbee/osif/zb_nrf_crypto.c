@@ -105,7 +105,7 @@ zb_uint32_t zb_random_seed(void)
 void zb_osif_aes_init(void)
 {
 #if CONFIG_CRYPTO_NRF_ECB
-	dev = device_get_binding(CONFIG_CRYPTO_NRF_ECB_DRV_NAME);
+	dev = device_get_binding(DT_LABEL(DT_INST(0, nordic_nrf_ecb)));
 	__ASSERT(dev, "Crypto driver not found");
 #endif
 }
