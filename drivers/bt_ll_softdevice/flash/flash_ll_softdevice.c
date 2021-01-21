@@ -17,8 +17,15 @@
 #include "sdc_soc.h"
 #include "multithreading_lock.h"
 
+#if DT_NODE_HAS_STATUS(DT_INST(0, nordic_nrf52_flash_controller), okay)
+#define DT_DRV_COMPAT nordic_nrf52_flash_controller
+#elif DT_NODE_HAS_STATUS(DT_INST(0, nordic_nrf53_flash_controller), okay)
+#define DT_DRV_COMPAT nordic_nrf53_flash_controller
+#else
+#error No matching compatible for soc_flash_nrf.c
+#endif
+
 #define SOC_NV_FLASH_NODE DT_NODELABEL(flash0)
-#define SOC_NV_FLASH_CONTROLLER_NODE DT_NODELABEL(flash_controller)
 
 /* NOTE: The driver supports unaligned writes, but some file systems (like FCB)
  * may use the driver sub-optimally as a result. Word aligned writes are faster
@@ -394,6 +401,6 @@ static int flash_init(const struct device *dev)
 }
 
 // TODO TORA: upmerge confirmation from Robert needed.
-DEVICE_AND_API_INIT(flash, DT_LABEL(SOC_NV_FLASH_CONTROLLER_NODE),
-		    flash_init, NULL, NULL, POST_KERNEL,
-		    CONFIG_KERNEL_INIT_PRIORITY_DEVICE, &flash_api);
+DEVICE_DT_INST_DEFINE(0, flash_init, device_pm_control_nop,
+		      NULL, NULL, POST_KERNEL,
+		      CONFIG_KERNEL_INIT_PRIORITY_DEVICE, &flash_api);

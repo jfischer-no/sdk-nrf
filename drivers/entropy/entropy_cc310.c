@@ -20,6 +20,8 @@
 #include "nrf_cc3xx_platform_entropy.h"
 #endif
 
+#define DT_DRV_COMPAT	arm_cryptocell_310
+
 static int entropy_cc3xx_rng_get_entropy(
 	const struct device *dev,
 	uint8_t *buffer,
@@ -102,9 +104,7 @@ static const struct entropy_driver_api entropy_cc3xx_rng_api = {
 #error "No cryptocell or cryptocell_sw node labels in the devicetree"
 #endif
 
-DEVICE_AND_API_INIT(entropy_cc3xx_rng, DEVICE_NAME,
-		    &entropy_cc3xx_rng_init,
-		    NULL,
-		    NULL,
-		    POST_KERNEL, CONFIG_KERNEL_INIT_PRIORITY_DEVICE,
-		    &entropy_cc3xx_rng_api);
+DEVICE_DT_INST_DEFINE(0, entropy_cc3xx_rng_init, device_pm_control_nop,
+		      NULL, NULL,
+		      POST_KERNEL, CONFIG_KERNEL_INIT_PRIORITY_DEVICE,
+		      &entropy_cc3xx_rng_api);
