@@ -9,7 +9,6 @@
 #include <zephyr/storage/stream_flash.h>
 #include <stdio.h>
 #include <dfu/dfu_target_stream.h>
-#include <dfu_stream_flatten.h>
 
 #ifdef CONFIG_DFU_TARGET_STREAM_SAVE_PROGRESS
 #define MODULE "dfu"
@@ -222,9 +221,6 @@ int dfu_target_stream_reset(void)
 {
 	int err = 0;
 
-	stream.buf_bytes = 0;
-	stream.bytes_written = 0;
-
 #ifdef CONFIG_DFU_TARGET_STREAM_SAVE_PROGRESS
 	err = settings_delete(current_name_key);
 	if (err != 0) {
@@ -238,10 +234,16 @@ int dfu_target_stream_reset(void)
 		return 0;
 	}
 
-	/* Erase just the first page. Stream write will take care of erasing remaining pages
-	 * on a next buffered_write round
-	 */
-	err = stream_flash_flatten_page(&stream, stream.offset);
+	/* Erase/scramble the stream area that was used. */
+	err = flash_flatten(stream.fdev, stream.offset, stream.bytes_written);
+	if (err) {
+		LOG_ERR("flash_flatten error %d", err);
+		return err;
+	}
+	/* Reinitialize stream_flash */
+	err = stream_flash_init(&stream, stream.fdev, stream.buf,
+				stream.buf_len, stream.offset,
+				stream.available + stream.bytes_written, NULL);
 	current_id = NULL;
 
 	return err;
